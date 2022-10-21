@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.test.ui.driver
+package uk.gov.hmrc.test.ui.pages
 
-import com.typesafe.scalalogging.LazyLogging
-import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.webdriver.SingletonDriver
+import org.openqa.selenium.By
+import org.scalatest.OptionValues
 
-trait BrowserDriver extends LazyLogging {
-  logger.info(
-    s"Instantiating Browser: ${sys.props.getOrElse("browser", "'browser' System property not set. This is required")}"
-  )
+import scala.collection.JavaConverters._
 
-  implicit lazy val driver: WebDriver = SingletonDriver.getInstance()
+object AddPropertyPage extends BasePage with BooleanPage with OptionValues {
+
+  override def url: String = "add-property"
+
+  def remove(index: Int): Unit = {
+    onPage()
+    driver.findElements(By.xpath("//a[*text() = 'Remove']")).asScala.lift(index - 1).value.click()
+  }
 }
