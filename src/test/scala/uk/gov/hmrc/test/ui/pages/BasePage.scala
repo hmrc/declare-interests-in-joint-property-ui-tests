@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,25 @@
 package uk.gov.hmrc.test.ui.pages
 
 import org.openqa.selenium.By
-import org.scalatest.matchers.should.Matchers
+import org.scalactic.source.Position
+import org.scalatest.matchers.must.Matchers
+import uk.gov.hmrc.test.ui.conf.TestConfiguration
 import uk.gov.hmrc.test.ui.driver.BrowserDriver
 
 trait BasePage extends BrowserDriver with Matchers {
-  val continueButton = "continue-button"
 
-  def submitPage(): Unit =
-    driver.findElement(By.id(continueButton)).click()
+  def url: String
 
-  def onPage(pageTitle: String): Unit =
-    if (driver.getTitle != pageTitle)
-      throw PageNotFoundException(
-        s"Expected '$pageTitle' page, but found '${driver.getTitle}' page."
-      )
+  def continue()(implicit pos: Position): Unit =
+    driver.findElement(By.xpath("//button[contains(text(), 'Continue')]")).click()
+
+  def onPage()(implicit pos: Position): Unit =
+    driver.getCurrentUrl must startWith(
+      s"${TestConfiguration.url("declare-interests-in-joint-property-frontend")}/$url"
+    )
+
+  def selectFromAutocomplete(inputId: String, data: String): Unit = {
+    driver.findElement(By.id(inputId)).sendKeys(data)
+    driver.findElement(By.cssSelector(s"li#${inputId}__option--0")).click()
+  }
 }
-
-case class PageNotFoundException(s: String) extends Exception(s)

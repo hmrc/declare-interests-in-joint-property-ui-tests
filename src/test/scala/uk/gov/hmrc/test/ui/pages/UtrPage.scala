@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.test.ui.driver
+package uk.gov.hmrc.test.ui.pages
 
-import com.typesafe.scalalogging.LazyLogging
-import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.webdriver.SingletonDriver
+import org.openqa.selenium.By
+import org.scalacheck.Gen
+import org.scalactic.source.Position
+import org.scalatest.OptionValues
 
-trait BrowserDriver extends LazyLogging {
-  logger.info(
-    s"Instantiating Browser: ${sys.props.getOrElse("browser", "'browser' System property not set. This is required")}"
-  )
+trait UtrPage extends OptionValues { _: BasePage =>
 
-  implicit lazy val driver: WebDriver = SingletonDriver.getInstance()
+  private val arbitraryUtr: Gen[String] = Gen.listOfN(10, Gen.numChar).map(_.mkString)
+
+  private lazy val utr: String = arbitraryUtr.sample.value
+
+  def answer()(implicit pos: Position): Unit = {
+    onPage()
+    driver.findElement(By.id("value")).sendKeys(utr)
+    continue()
+  }
 }
